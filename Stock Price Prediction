@@ -1,0 +1,133 @@
+rm(list=ls(all=TRUE))
+stocks <- read.table("C:/stocks.csv",header=TRUE,sep=",")
+summary(stocks)
+attach(stocks)
+#Computing Wipro returns
+Wipro_closeprice = Wipro[1:99]
+Wipro_closeprice1 = Wipro[2:100]
+Return_Wipro = round(((Wipro_closeprice1 - Wipro_closeprice)/Wipro_closeprice),4)
+Return_Wipro
+#Calculating BHEL Returns
+BHEL_closeprice = BHEL[1:99]
+BHEL_closeprice1 = BHEL[2:100]
+Return_BHEL = round(((BHEL_closeprice1 - BHEL_closeprice)/BHEL_closeprice),4)
+Return_BHEL
+#Calculating TCS Returns
+TCS_closeprice = TCS[1:99]
+TCS_closeprice1 = TCS[2:100]
+Return_TCS = round(((TCS_closeprice1 - TCS_closeprice)/TCS_closeprice),4)
+Return_TCS
+#Computing the log returns of Wipro
+Log_Return_Wipro=round(log(Wipro_closeprice1/Wipro_closeprice),4)
+Log_Return_Wipro
+#Computing the log returns of BHEL
+Log_Return_BHEL=round(log(BHEL_closeprice1/BHEL_closeprice),4)
+Log_Return_BHEL
+#Computing Log Returns of TCS
+Log_Return_TCS=round(log(TCS_closeprice1/TCS_closeprice),4)
+Log_Return_TCS
+#For all the three stocks, the returns and log returns are almost the same.
+#Calculating the Auto Correlationg Factor of Wipro
+acf(Wipro,lag.max=100,col="red",main="Time Series Plot",xlab="Lag",ylab="ACF(Auto Correlation Factor)")
+#Calculating the Auto Correlationg Factor of TCS
+acf(TCS,lag.max=100,col="red",main="ACF Plot of TCS",xlab="Lag",ylab="ACF(Auto Correlation Factor)")
+#Calculating the Auto Correlationg Factor of BHEL
+acf(BHEL,lag.max=100,col="red",main="ACF Plot",xlab="Lag",ylab="ACF(Auto Correlation Factor)")
+#Calculating the Auto Correlationg Factor for Returns of Wipro
+acf(Return_Wipro,lag.max=100,col="blue",main="ACF Plot",xlab="Lag",ylab="ACF(Auto Correlation Factor)")
+#Calculating the Auto Correlationg Factor for Returns of BHEL
+acf(Return_BHEL,lag.max=100,col="blue",main="Time Series Plot", xlab = "Lag", ylab = "ACF(Auto Correlation Factor)")
+#Calculating the Auto Correlationg Factor for Returns of TCS
+acf(Return_TCS,lag.max=100,col="blue",main="ACF Plot for Returns of TCS", xlab="Lag", ylab = "ACF(Auto Correlation Factor)")
+#Calculating Variance of Wipro
+Variance_Wipro=array(dim=c(95,1))
+Return_Wipro_square= Return_Wipro*Return_Wipro
+for (i in 1:95){
+  j=i+4
+  Variance_Wipro [i]=mean(Return_Wipro_square[i:j])
+}
+Variance_Wipro
+#Time Series Plot for Variance of Wipro
+ts.plot(Variance_Wipro, col="brown",main="Time Series Plot for Variance of Wipro", xlab= "Time", ylab="Variance")
+#Calculating the Auto Correlation Factor for the Variance of Wipro
+acf(Variance_Wipro,lag.max=95,col="blue",main="ACF Plot for Variance of Wipro", xlab="Lag", ylab="ACF(Auto Correlation Factor)")
+#Calculating Variance of BHEL
+Variance_BHEL=array(dim=c(95,1))
+Return_BHEL_square= Return_BHEL*Return_BHEL
+for (i in 1:95){
+  j=i+4
+  Variance_BHEL [i]=mean(Return_BHEL_square[i:j])
+}
+Variance_BHEL
+#Time Series Plot for Variance of BHEL
+ts.plot(Variance_BHEL, col="brown",main="Time Series Plot for Variance of BHEL", xlab= "Time", ylab="Variance")
+#Calculating the Auto Correlation Factor for the Variance of BHEL
+acf(Variance_BHEL,lag.max=95,col="blue",main="ACF Plot for Variance of BHEL", xlab="Lag", ylab="ACF(Auto Correlation Factor)")
+#Calculating Variance of TCS
+Variance_TCS=array(dim=c(95,1))
+Return_TCS_square= Return_TCS*Return_TCS
+for (i in 1:95){
+  j=i+4
+  Variance_TCS [i]=mean(Return_TCS_square[i:j])
+}
+Variance_TCS
+#Time Series Plot for Variance of TCS
+ts.plot(Variance_TCS, col="brown",main="Time Series Plot for Variance of TCS", xlab= "Time", ylab="Variance")
+#Calculating the Auto Correlation Factor for the Variance of TCS
+acf(Variance_TCS,lag.max=95,col="blue",main="ACF Plot for Variance of TCS", xlab="Lag", ylab="ACF(Auto Correlation Factor)")
+#The ideal values of (p,d,q) are (0,1,0). The reason is that for all the 3 stocks the correlation is changing really fast hence d=1, and there are gradual spikes hence p and q are 0, 0.
+#Simple Moving Average of Wipro
+SMA_Return_Wipro=SMA(Return_Wipro,n=99)
+SMA_Return_Wipro
+#Simple Moving Average of TCS
+SMA_Return_TCS=SMA(Return_TCS,n=99)
+SMA_Return_TCS
+#Simple Moving Average of BHEL
+SMA_Return_BHEL=SMA(Return_BHEL,n=99)
+SMA_Return_BHEL
+#Weighted moving averages of Wipro
+WMA_Return_Wipro=WMA(Return_Wipro,n=99,wts=1:99)
+WMA_Return_Wipro
+#Weighted moving averages of TCS
+WMA_Return_TCS=WMA(Return_TCS, n=99, wts=1:99)
+WMA_Return_TCS
+#Weighted moving averages of BHEL
+WMA_Return_BHEL=WMA(Return_BHEL, n=99, wts=1:99)
+WMA_Return_BHEL
+#Exponential Weighted Moving Averages of Wipro
+EMA_Return_Wipro=EMA(Return_Wipro, n=99, wilder=FALSE, ratio=NULL)
+EMA_Return_Wipro
+#Exponential Weighted Moving Averages of TCS
+EMA_Return_TCS=EMA(Return_TCS, n=99, wilder=FALSE, ratio=NULL)
+EMA_Return_TCS
+#Exponential Weighted Moving Averages of BHEL
+EMA_Return_BHEL=EMA(Return_BHEL, n=99, wilder=FALSE, ratio=NULL)
+EMA_Return_BHEL
+#Forecast of Wipro 
+Forecast_Wipro = array(dim=c(100,1))
+for(i in 10:100){
+  j=i-9
+  ARIMA=arima(Return_Wipro[j:i],order=c(0,1,0))
+  a=predict(ARIMA,1)
+  Forecast_Wipro[i+1]=a$pred
+}
+Forecast_Wipro
+#Forecast of TCS
+Forecast_TCS = array(dim=c(100,1))
+for(i in 10:100){
+  j=i-9
+  ARIMA=arima(Return_TCS[j:i],order=c(0,1,0))
+  a=predict(ARIMA,1)
+  Forecast_TCS[i+1]=a$pred
+}
+Forecast_TCS
+#Forecast of BHEL
+Forecast_BHEL = array(dim=c(100,1))
+for(i in 10:100){
+  j=i-9
+  ARIMA=arima(Return_BHEL[j:i],order=c(0,1,0))
+  a=predict(ARIMA,1)
+  Forecast_BHEL[i+1]=a$pred
+}
+Forecast_BHEL
+
