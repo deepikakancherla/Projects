@@ -1,0 +1,242 @@
+rm(list=ls(all=TRUE))
+data <- read.table("C:/Data Mining/CBC_4000.csv",header=TRUE,sep=",")
+attach(data)
+sum(is.na(data))
+names(data)
+dim(data)
+summary(data)
+#scatter plots and correlations between Numeric data (Correlation Matrix)
+plot(Seq)
+plot(ID)
+plot(M)
+plot(FirstPurch)
+plot(R)
+pairs(~Seq+ID+M+R+FirstPurch,main="Simple Scatter Plots")
+cor(Seq,M)
+cor(ID,M)
+cor(ID,FirstPurch)
+cor(Seq,FirstPurch)
+cor(Seq,ID)
+cor(M,FirstPurch)
+cor(M,R)
+cor(subset(data,select=c(Seq,ID,M,R,FirstPurch)))
+#Categorical Variables-Bar plots  and the Mode is the value which is occuring with highest frequency which can be explained with Bar Plot.
+Gender=as.factor(Gender)
+plot(Gender)
+F=as.factor(F)
+plot(F)
+ChildBks =as.factor(ChildBks )
+plot(ChildBks)
+YouthBks=as.factor(YouthBks)
+plot(YouthBks)
+CookBks=as.factor(CookBks)
+plot(CookBks)
+DoItYBks=as.factor(DoItYBks)
+plot(DoItYBks)
+RefBks=as.factor(RefBks)
+plot(RefBks)
+ArtBks=as.factor(ArtBks)
+plot(ArtBks)
+GeogBks=as.factor(GeogBks)
+plot(GeogBks)
+ItalCook =as.factor(ItalCook )
+plot(ItalCook )
+ItalAtlas =as.factor(ItalAtlas )
+plot(ItalAtlas )
+ItalArt=as.factor(ItalArt)
+plot(ItalArt)
+Florence =as.factor(Florence )
+plot(Florence )
+Mcode=as.factor(Mcode)
+plot(Mcode)
+Rcode=as.factor(Rcode)
+plot(Rcode)
+Fcode=as.factor(Fcode)
+plot(Fcode)
+Yes_Florence=as.factor(Yes_Florence)
+plot(Yes_Florence)
+No_Florence=as.factor(No_Florence)
+plot(No_Florence)
+#Dividing data in training and testing 
+train=sample(1:4000,3000)
+train_data=data[train,]
+dim(train_data)
+test=(1:4000)[-train]
+test_data=data[test,]
+dim(test_data)
+#Verifying the properties
+table(data$Gender)
+table(train_data$Gender)
+table(test_data$Gender)
+table(data$M)
+table(train_data$M)
+table(test_data$M)
+table(data$R)
+table(train_data$R)
+table(test_data$R)
+table(data$F)
+table(train_data$F)
+table(test_data$F)
+#Modeling part
+#Naive Bayes
+#Equal Frequency Binning
+install.packages("infotheo")
+library(infotheo) 
+subt=subset(data,select=c(M,R,F,FirstPurch))
+subt1=discretize(subt,disc="equalfreq",nbins=5)
+head(subt1)
+subt2=cbind(subt1,Gender,ArtBks,ItalAtlas,ItalArt,Florence)
+head(subt2)
+detach(data)
+attach(subt2)
+plot(M)
+M=as.factor(M)
+plot(M)
+R=as.factor(R)
+F=as.factor(F)
+FirstPurch=as.factor(FirstPurch)
+#Building Naive Bayes on training data
+train=sample(1:4000,3000)
+train_data=subt2[train,]
+dim(train_data)
+test=(1:4000)[-train]
+test_data=subt2[test,]
+dim(test_data)
+#install.packages("e1071")
+library(e1071)
+modelnb = naiveBayes(train_data$Florence ~ ., data =train_data)
+#Reporting Error and accuracies for both training and test data
+table(train_data$Florence, predict(modelnb,train_data))
+pred=predict(modelnb,train_data)
+at=table(train_data$Florence, pred)
+e_nbtr=(at[1,2]+at[2,1])/(at[1,1]+at[2,2]+at[1,2]+at[2,1])*100
+r_nbtr=(at[2,2])/(at[2,1]+at[2,2])*100
+table(test_data$Florence, predict(modelnb,test_data))
+a=table(test_data$Florence, predict(modelnb,test_data))
+e_nbte=(a[1,2]+a[2,1])/(a[1,1]+a[2,2]+a[1,2]+a[2,1])*100
+r_nbte=(a[2,2])/(a[2,1]+a[2,2])*100
+e_nbtr
+e_nbte
+r_nbtr
+r_nbte
+#Building a Decision Tree
+#install.packages("RWeka")
+library(RWeka)
+modeldtc45= J48(train_data$Florence ~ ., data =train_data)
+summary(modeldtc45)
+table(train_data$Florence, predict(modeldtc45))
+a=table(train_data$Florence, predict(modeldtc45,train_data))
+r_c45tr=(a[2,2])/(a[2,1]+a[2,2])*100
+r_c45tr
+table(test_data$Florence, predict(modeldtc45,test_data))
+at=table(test_data$Florence, predict(modeldtc45,test_data))
+r_c45te=(at[2,2])/(at[2,1]+at[2,2])*100
+r_c45te
+#Random Forest
+library(randomForest)
+modelrf=randomForest(train_data$Florence~., data=train_data, ntree=700)
+plot(modelrf)
+importance(modelrf)
+table(train_data$Florence, predict(modelrf))   
+a=table(train_data$Florence, predict(modelrf,train_data))
+r_rftr=(a[2,2])/(a[2,1]+a[2,2])*100
+table(test_data$Florence, predict(modelrf,test_data))
+at=table(test_data$Florence, predict(modelrf,test_data))
+r_rfte=(at[2,2])/(at[2,1]+at[2,2])*100
+r_rftr
+r_rfte
+#AdaBoost
+modelab <- AdaBoostM1(train_data$Florence~ .,train_data, control=Weka_control(I=100))
+table(train_data$Florence, predict(modelab))   
+a=table(train_data$Florence, predict(modelab,train_data))
+r_abtr=(a[2,2])/(a[2,1]+a[2,2])*100
+table(test_data$Florence, predict(modelab,test_data))   
+at=table(test_data$Florence, predict(modelab,test_data))
+r_abte=(at[2,2])/(at[2,1]+at[2,2])*100
+r_abtr
+r_abte
+#Smoting Data
+#install.packages("DMwR")
+library(DMwR)
+subt3=subt2
+table(subt3$Florence)
+subt3=SMOTE(subt3$Florence~.,subt3,prec.over=600)
+dim(subt3)
+table(subt3$Florence)
+#rownames(subt3)=as.r(seq(1:2366))
+train=sample(1:2366,1800)
+train_datas=subt3[train,]
+test=(1:2366)[-train]
+test_datas=subt3[test,]
+table(train_datas$Florence)
+table(test_datas$Florence)
+#Naive Bayes
+modelnbs = naiveBayes(train_datas$Florence ~ ., data =train_datas)
+table(train_datas$Florence, predict(modelnbs,train_datas))
+pred=predict(modelnbs,train_datas)
+at=table(train_datas$Florence, pred)
+e_nbtrs=(at[1,2]+at[2,1])/(at[1,1]+at[2,2]+at[1,2]+at[2,1])*100
+r_nbtrs=(at[2,2])/(at[2,1]+at[2,2])*100
+table(test_datas$Florence, predict(modelnbs,test_datas))
+a=table(test_datas$Florence, predict(modelnbs,test_datas))
+e_nbtes=(a[1,2]+a[2,1])/(a[1,1]+a[2,2]+a[1,2]+a[2,1])*100
+r_nbtes=(a[2,2])/(a[2,1]+a[2,2])*100
+e_nbtrs
+e_nbtes
+r_nbtrs
+r_nbtes
+#Decision Tree
+modeldtc45s= J48(train_datas$Florence ~ ., data =train_datas)
+summary(modeldtc45s)
+table(train_datas$Florence, predict(modeldtc45s))
+a=table(train_datas$Florence, predict(modeldtc45s,train_datas))
+r_c45trs=(a[2,2])/(a[2,1]+a[2,2])*100
+r_c45trs
+table(test_datas$Florence, predict(modeldtc45s,test_datas))
+at=table(test_datas$Florence, predict(modeldtc45s,test_datas))
+r_c45tes=(at[2,2])/(at[2,1]+at[2,2])*100
+r_c45tes
+#Random Forest
+modelrfs=randomForest(train_datas$Florence~., data=train_datas, ntree=700)
+plot(modelrfs)
+importance(modelrfs)
+table(train_datas$Florence, predict(modelrfs))   
+a=table(train_datas$Florence, predict(modelrfs,train_datas))
+r_rftrs=(a[2,2])/(a[2,1]+a[2,2])*100
+table(test_datas$Florence, predict(modelrfs,test_datas))
+at=table(test_datas$Florence, predict(modelrfs,test_datas))
+r_rftes=(at[2,2])/(at[2,1]+at[2,2])*100
+r_rftrs
+r_rftes
+#AdaBoost
+modelabs <- AdaBoostM1(train_datas$Florence~ .,train_datas, control=Weka_control(I=100))
+table(train_datas$Florence, predict(modelabs))   
+a=table(train_datas$Florence, predict(modelabs,train_datas))
+r_abtrs=(a[2,2])/(a[2,1]+a[2,2])*100
+table(test_datas$Florence, predict(modelabs,test_datas))   
+at=table(test_datas$Florence, predict(modelabs,test_datas))
+r_abtes=(at[2,2])/(at[2,1]+at[2,2])*100
+r_abtrs
+r_abtes
+#Checking Accuracy
+recall_comp=matrix(c(r_nbtr, r_nbte, r_nbtrs, r_nbtes, r_c45tr, r_c45te,r_c45trs, r_c45tes, r_rftr, r_rfte,r_rftrs, r_rftes, r_abtr, r_abte,r_abtrs, r_abtes), nrow=1)
+colnames(recall_comp)=c('NB_Tr', 'NB_TE', 'NB_TRS', 'NB_TES', 'C4.5TR', 'C4.5TE','C4.5TRS', 'C4.5TES', 'RFTR', 'RFTE','RFTRS', 'RFTES', 'ABTR', 'ABTE','ABTRS', 'ABTES')
+recall_comp
+#Visualization
+names(train_data)
+counts<-table(train_data$Florence,train_data$M)
+barplot(counts,main="Florence vs M",xlab="M",col=c("darkblue","red"),legend=rownames(counts))
+counts<-table(train_data$Florence,train_data$R)
+barplot(counts,main="Florence vs R",xlab="R",col=c("darkblue","red"),legend=rownames(counts))
+counts<-table(train_data$Florence,train_data$F)
+barplot(counts,main="Florence vs F",xlab="F",col=c("darkblue","red"),legend=rownames(counts))
+counts<-table(train_data$Florence,train_data$FirstPurch)
+barplot(counts,main="Florence vs FirstPurch",xlab="FirstPurch",col=c("darkblue","red"),legend=rownames(counts))
+counts<-table(train_data$Florence,train_data$Gender)
+barplot(counts,main="Florence vs Gender",xlab="Gender",col=c("darkblue","red"),legend=rownames(counts))
+counts<-table(train_data$Florence,train_data$ArtBks)
+barplot(counts,main="Florence vs ArtBks",xlab="ArtBks",col=c("darkblue","red"),legend=rownames(counts))
+counts<-table(train_data$Florence,train_data$ItalAtlas)
+barplot(counts,main="Florence vs ItalAtlas",xlab="ItalAtlas",col=c("darkblue","red"),legend=rownames(counts))
+counts<-table(train_data$Florence,train_data$ItalArt)
+barplot(counts,main="Florence vs ItalArt",xlab="ItalArt",col=c("darkblue","red"),legend=rownames(counts))
